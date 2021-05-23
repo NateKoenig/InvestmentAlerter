@@ -27,4 +27,4 @@ def email_alert(subject, body, to):
 
 # Test function, send this stuff to my number (if you want email, just replace w/ email to send to)
 if __name___ == '__main__':
-	email_alert("Hey", "Hello world", "put your phone number of email here")
+	email_alert("Hey", "Hello world", "put your phone number or email here")
