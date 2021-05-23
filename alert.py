@@ -32,7 +32,7 @@ def scrape():
 		elif price >= 5:
 			body = "DOGE is up over 5% today at {}%".format(price)
 		else:
-			body = "DOGE is down a bit today at {}%".format(price)
+			body = "DOGE is up a bit today at {}%".format(price)
 	else:
 		price = float(price[1:])
 		subject = "Oops!"
@@ -46,7 +46,7 @@ def scrape():
 			body = "DOGE is down a bit today at {}%".format(price)
 
 	#make this an option later, for now send to me (verizon)
-	to = "enter number or email"
+	to = "your number/email goes here"
 
 
 	#calls message alert
@@ -62,9 +62,9 @@ def messageAlert(subject, body, to):
 	msg['to'] = to
 
 	#new email
-	user = "enter 'from' email"
+	user = "your 'from' email"
 	msg['from'] = user
-	password = "enter your app key from that email"
+	password = "your email's app key"
 
 
 	#necessary to be able to send email/text, like a server from gmail
@@ -81,6 +81,6 @@ def messageAlert(subject, body, to):
 if __name__ == '__main__':
 	while True: #Infinite loop (create count variable later if want to only run for a certain period of time)
 		scrape() #Execute the function, feeding it the last percentage
-		time.sleep(600) #Wait 60s (10 min) before re-entering the cycle
+		time.sleep(600) #Wait 600s (10 min) before re-entering the cycle
 
 
