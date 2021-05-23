@@ -1,2 +1,2 @@
 # VIPEmail
-Get messaged when a certain person / email address emails you - using Twilio
+Get message alerts about a stock / crypto of your choice 
