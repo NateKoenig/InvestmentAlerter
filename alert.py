@@ -48,27 +48,29 @@ def createMessage(price, lastPrice, curPriceUpOrDown, lasPriceUpOrDown):
 				body = "DOGE is down a bit today at {}%".format(price)
 	#otherwise if they're both positive, only message something if there's a new threshold
 	elif curPriceUpOrDown == "up":
-		if price >= 20 and lasPrice <20:
+		subject = "LET'S GO!"
+		if price >= 20 and lastPrice <20:
 			body = "DOGE is up over 20% today at {}%".format(price)
-		elif price >= 10 and (lasPrice >=20 or lasPrice < 10):
+		elif price >= 10 and price < 20 and (lastPrice >=20 or lastPrice < 10):
 			body = "DOGE is up over 10% today at {}%".format(price)
-		elif price >= 5 and (lasPrice >=10 or lasPrice < 5):
+		elif price >= 5 and price < 10 and (lastPrice >=10 or lastPrice < 5):
 			body = "DOGE is up over 5% today at {}%".format(price)
 		else:
 			messageSomething = 0 #do nothing, no significant change
 	#otherwise, they're both negative, only message something if there's a new threshold
 	else:
-		if price >= 20 and lasPrice <20:
+		subject = "OUCH!"
+		if price >= 20 and lastPrice <20:
 			body = "DOGE is down over 20% today at {}%".format(price)
-		elif price >= 10 and (lasPrice >= 20 or lasPrice < 10):
+		elif price >= 10 and price < 20 and (lastPrice >= 20 or lastPrice < 10):
 			body = "DOGE is down over 10% today at {}%".format(price)
-		elif price >= 5 and (lasPrice >= 10 or lasPrice < 5):
+		elif price >= 5 and price < 10 and (lastPrice >= 10 or lastPrice < 5):
 			body = "DOGE is down over 5% today at {}%".format(price)
 		else:
 			messageSomething = 0 #do nothing, no significant change
 
 	#make this an option later, for now send to me (verizon)
-	to = "the number/email you want to send to goes here"
+	to = "put your recipient email/text here"
 
 
 	#calls message alert only if we need to message something
@@ -85,9 +87,9 @@ def messageAlert(subject, body, to):
 	msg['to'] = to
 
 	#new email
-	user = "your sent from email goes here"
+	user = "put your sender email here"
 	msg['from'] = user
-	password = "your sent from email app password goes here"
+	password = "put your sender email app password here"
 
 
 	#necessary to be able to send email/text, like a server from gmail
@@ -102,13 +104,10 @@ def messageAlert(subject, body, to):
 
 # Driver
 if __name__ == '__main__':
-
-	thing = "10.0"
-	thing2 = float(thing)
-
 	#create variables
 	price = "this is a price"
 	lastPrice = "100000.00"
+	savePrice = "save this"
 
 	#run infinitely
 	while True:
@@ -132,3 +131,5 @@ if __name__ == '__main__':
 		lastPrice = savePrice #update last price
 
 		time.sleep(300) #wait 300s (5 min) before re-entering the cycle
+
+
