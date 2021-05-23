@@ -1,2 +1,2 @@
 # InvestmentAlerter
-Get message alerts about a stock / crypto of your choice 
+Get automated message alerts from a crypto of your choice 
