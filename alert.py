@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup as soup
 import time
 
 def webScrape():
-	my_url = 'https://www.coindesk.com/price/ethereum'
+	my_url = 'https://robinhood.com/crypto/ETH'
 
 	#opening up connection and grab page
 	uClient = uReq(my_url)
@@ -15,13 +15,20 @@ def webScrape():
 	#html parsing
 	page_soup = soup(page_html, "html.parser")
 
-	print("Scraping")
 	#grab price diff %
-	return str(page_soup.findAll("span", {"class":"percent-value-text"})[0].text)
+	data = str(page_soup.findAll("span", {"class":"css-dq91k1"})[6].text)
+	data = data[:-2]
+	newData = ""
+	for element in reversed(data):
+		if element == '(':
+			break
+		else:
+			newData += element
+	newData = newData[::-1]
+	return str(newData)
 
 
 def createMessage(currentDelta, priorDelta):
-	print("Entering createMessage")
 	#initialize variables
 	subject = "This is the subject"
 	body = "This is my message"
@@ -30,10 +37,10 @@ def createMessage(currentDelta, priorDelta):
 	currentUpDown = "up"
 	priorUpDown = "up"
 	if priorDelta != currentDelta: #first check: string comparison to see if at least different, send message if not the same
-		print("Not the same, need to check to see if different by pos and neg or different by >= 1")
+		print("Not the same price")
 		
 		#the number or email that we're sending the message to. Make this an option later
-		to = "your send to number or email"
+		to = "your send to phone number or email"
 
 		#second check pt1: get magnitudes of each
 		if currentDelta[0] == '-':
@@ -48,7 +55,7 @@ def createMessage(currentDelta, priorDelta):
 
 		#second check pt2: if the two are different in pos & neg and or the two are different by 1 percent or more, send message
 		if currentUpDown != priorUpDown:
-			print("One price pos and one price neg")
+			print("One price was pos and one price was neg")
 			#send message saying the price is now (up or down) by _____
 			if currentDelta > 0:
 				subject = "Good News!"
@@ -60,6 +67,7 @@ def createMessage(currentDelta, priorDelta):
 				body = "ETH is now down today at {}%".format(currentDelta)
 				sendMessage(subject, body, to)
 				print("Sent Message")
+			return 'yes'
 		elif abs(currentDelta - priorDelta) >= 1:
 			print("Price differed by >= 1")
 			if currentDelta > 0:
@@ -74,9 +82,11 @@ def createMessage(currentDelta, priorDelta):
 				body = "ETH is still down today at {}%".format(currentDelta)
 				sendMessage(subject, body, to)
 				print("Sent Message")
-	print("I either sent or didn't send a message")
+			return 'yes'
+
 	print("The current price is {}%".format(currentDelta))
-	print("The last price was {}%".format(priorDelta))
+	print("The last price messaged was {}%".format(priorDelta))
+	return 'no'
 
 def sendMessage(subject, body, to):
 	#use EmailMessage library and set variables based on function arguments
@@ -91,7 +101,7 @@ def sendMessage(subject, body, to):
 if __name__ == '__main__':
 	#email and login setup
 	msg = EmailMessage()
-	user = "your sent from email"
+	user = "your sent frome mail"
 	msg['from'] = user
 	password = "your sent from email app password"
 
@@ -103,6 +113,7 @@ if __name__ == '__main__':
 	currentDelta = "this is the current percent change in price"
 	priorDelta = "1000000"
 	count = 0
+	update = 'no'
 
 
 	while count != 60: #this program will run for 1 hour
@@ -110,14 +121,17 @@ if __name__ == '__main__':
 		currentDelta = webScrape()
 
 		#creates and possibly sends message
-		createMessage(currentDelta, priorDelta)
+		update = createMessage(currentDelta, priorDelta)
 
 		#copy over the last currentDelta
-		priorDelta = currentDelta
+		#priorDelta = currentDelta <-- Can't do this, or if increases or decreases little by little we'll never be alerted
+		if (update == 'yes'):
+			priorDelta = currentDelta
 
-		time.sleep(60) #wait 1 minute before checking again
 		print('----------This was cycle {}----------'.format(count))
+		time.sleep(60) #wait 1 minute before checking again
 		count = count + 1
 
 	server.quit()
+
 
