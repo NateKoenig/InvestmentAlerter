@@ -4,10 +4,10 @@ from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 import time
 
-def scrape():
-	my_url = 'https://www.coindesk.com/price/dogecoin'
+def webScrape():
+	my_url = 'https://www.coindesk.com/price/ethereum'
 
-	#opening up connection, grabbing page
+	#opening up connection and grab page
 	uClient = uReq(my_url)
 	page_html = uClient.read()
 	uClient.close()
@@ -15,71 +15,70 @@ def scrape():
 	#html parsing
 	page_soup = soup(page_html, "html.parser")
 
+	print("Scraping")
 	#grab price diff %
 	return str(page_soup.findAll("span", {"class":"percent-value-text"})[0].text)
 
-def createMessage(price, lastPrice, curPriceUpOrDown, lasPriceUpOrDown):
+
+def createMessage(currentDelta, priorDelta):
+	print("Entering createMessage")
 	#initialize variables
 	subject = "This is the subject"
 	body = "This is my message"
-	messageSomething = 1
 
-	#if the current and last price differ over the 0% price line, then we update
-	if curPriceUpOrDown != lasPriceUpOrDown:
-		if curPriceUpOrDown == "up":
-			subject = "LET'S GO!"
-			if price >= 20:
-				body = "DOGE is up over 20% in the last 24 hours at {}%".format(price)
-			elif price >= 10:
-				body = "DOGE is up over 10% in the last 24 hours at {}%".format(price)
-			elif price >= 5:
-				body = "DOGE is up over 5% in the last 24 hours at {}%".format(price)
+
+	currentUpDown = "up"
+	priorUpDown = "up"
+	if priorDelta != currentDelta: #first check: string comparison to see if at least different, send message if not the same
+		print("Not the same, need to check to see if different by pos and neg or different by >= 1")
+		
+		#the number or email that we're sending the message to. Make this an option later
+		to = "your send to number or email"
+
+		#second check pt1: get magnitudes of each
+		if currentDelta[0] == '-':
+			currentDelta = currentDelta[1:]
+			currentUpDown = "down"
+		currentDelta = float(currentDelta)
+
+		if priorDelta[0] == '-':
+			priorDelta = priorDelta[1:]
+			priorUpDown = "down"
+		priorDelta = float(priorDelta)
+
+		#second check pt2: if the two are different in pos & neg and or the two are different by 1 percent or more, send message
+		if currentUpDown != priorUpDown:
+			print("One price pos and one price neg")
+			#send message saying the price is now (up or down) by _____
+			if currentDelta > 0:
+				subject = "Good News!"
+				body = "ETH is now up today at {}%".format(currentDelta)
+				sendMessage(subject, body, to)
+				print("Sent Message")
 			else:
-				body = "DOGE is up a bit in the last 24 hours at {}%".format(price)
-		else:
-			subject = "OUCH!"
-			if price >= 20:
-				body = "DOGE is down over 20% in the last 24 hours at {}%".format(price)
-			elif price >= 10:
-				body = "DOGE is down over 10% in the last 24 hours at {}%".format(price)
-			elif price >= 5:
-				body = "DOGE is down over 5% in the last 24 hours at {}%".format(price)
+				subject = "Bad News!"
+				body = "ETH is now down today at {}%".format(currentDelta)
+				sendMessage(subject, body, to)
+				print("Sent Message")
+		elif abs(currentDelta - priorDelta) >= 1:
+			print("Price differed by >= 1")
+			if currentDelta > 0:
+				#send message saying that the price is now up by ____
+				subject = "Good News!"
+				body = "ETH is still up today at {}%".format(currentDelta)
+				sendMessage(subject, body, to)
+				print("Sent Message")
 			else:
-				body = "DOGE is down a bit in the last 24 hours at {}%".format(price)
-	#otherwise if they're both positive, only message something if there's a new threshold
-	elif curPriceUpOrDown == "up":
-		subject = "LET'S GO!"
-		if price >= 20 and lastPrice <20:
-			body = "DOGE is up over 20% in the last 24 hours at {}%".format(price)
-		elif price >= 10 and price < 20 and (lastPrice >=20 or lastPrice < 10):
-			body = "DOGE is up over 10% in the last 24 hours at {}%".format(price)
-		elif price >= 5 and price < 10 and (lastPrice >=10 or lastPrice < 5):
-			body = "DOGE is up over 5% in the last 24 hours at {}%".format(price)
-		else:
-			messageSomething = 0 #do nothing, no significant change
-	#otherwise, they're both negative, only message something if there's a new threshold
-	else:
-		subject = "OUCH!"
-		if price >= 20 and lastPrice <20:
-			body = "DOGE is down over 20% in the last 24 hours at {}%".format(price)
-		elif price >= 10 and price < 20 and (lastPrice >= 20 or lastPrice < 10):
-			body = "DOGE is down over 10% in the last 24 hours at {}%".format(price)
-		elif price >= 5 and price < 10 and (lastPrice >= 10 or lastPrice < 5):
-			body = "DOGE is down over 5% in the last 24 hours at {}%".format(price)
-		else:
-			messageSomething = 0 #do nothing, no significant change
+				#send message saying that the price is now down by ____
+				subject = "Bad News!"
+				body = "ETH is still down today at {}%".format(currentDelta)
+				sendMessage(subject, body, to)
+				print("Sent Message")
+	print("I either sent or didn't send a message")
+	print("The current price is {}%".format(currentDelta))
+	print("The last price was {}%".format(priorDelta))
 
-	#make this an option later, for now send to me (verizon)
-	to = "then number or email you want to send the message to"
-
-
-	#calls message alert only if we need to message something
-	if messageSomething == 1:
-		messageAlert(subject, body, to)
-
-
-# Creates message alert
-def messageAlert(subject, body, to):
+def sendMessage(subject, body, to):
 	#use EmailMessage library and set variables based on function arguments
 	msg.set_content(body)
 	msg['subject'] = subject
@@ -89,50 +88,36 @@ def messageAlert(subject, body, to):
 
 
 
-#new email and login
-msg = EmailMessage()
-user = "your sent from email"
-msg['from'] = user
-password = "your sent from email app password"
-
-server = smtplib.SMTP("smtp.gmail.com", 587)
-server.starttls()
-server.login(user, password)
-
-
-# Driver
 if __name__ == '__main__':
-	#create variables
-	price = "this is a price"
-	lastPrice = "100000.00"
-	savePrice = "save this"
+	#email and login setup
+	msg = EmailMessage()
+	user = "your sent from email"
+	msg['from'] = user
+	password = "your sent from email app password"
+
+	server = smtplib.SMTP("smtp.gmail.com", 587)
+	server.starttls()
+	server.login(user, password)
+
+	#set variables
+	currentDelta = "this is the current percent change in price"
+	priorDelta = "1000000"
 	count = 0
 
-	#run infinitely
-	while count != 36:
-		price = scrape()
-		savePrice = price
 
-		if price[0] != '-':
-			if lastPrice[0] != '-':
-				createMessage(float(price), float(lastPrice), "up", "up")
-			else:
-				lastPrice = float(lastPrice[1:])
-				createMessage(float(price), lastPrice, "up", "down")
-		else:
-			price = float(price[1:])
-			if lastPrice[0] != '-':
-				createMessage(price, float(lastPrice), "down", "up")
-			else:
-				lastPrice = float(lastPrice[1:])
-				createMessage(float(price), lastPrice, "down", "down")
+	while count != 60: #this program will run for 1 hour
+		#scrape the data
+		currentDelta = webScrape()
 
-		lastPrice = savePrice #update last price
+		#creates and possibly sends message
+		createMessage(currentDelta, priorDelta)
 
-		time.sleep(300) #wait 300s (5 min) before re-entering the cycle
+		#copy over the last currentDelta
+		priorDelta = currentDelta
 
-		count = count + 1 #so this program will run for 3 hours
+		time.sleep(60) #wait 1 minute before checking again
+		print('----------This was cycle {}----------'.format(count))
+		count = count + 1
 
-	server.quit() #quit the server, we're done now
-
+	server.quit()
 
