@@ -4,8 +4,12 @@ from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 import time
 
+
+
+
+# Scrapes Robinhood for price (just ETH for now)
 def webScrape():
-	my_url = 'https://robinhood.com/crypto/ETH'
+	my_url = 'https://finance.yahoo.com/quote/BTC-USD?p=BTC-USD&.tsrc=fin-srch'
 
 	#opening up connection and grab page
 	uClient = uReq(my_url)
@@ -16,7 +20,8 @@ def webScrape():
 	page_soup = soup(page_html, "html.parser")
 
 	#grab price diff %
-	data = str(page_soup.findAll("span", {"class":"css-dq91k1"})[6].text)
+	data = str(page_soup.findAll("span", {"data-reactid":"34"})[1].text)
+
 	data = data[:-2]
 	newData = ""
 	for element in reversed(data):
@@ -25,113 +30,125 @@ def webScrape():
 		else:
 			newData += element
 	newData = newData[::-1]
-	return str(newData)
+	return float(newData)
 
 
-def createMessage(currentDelta, priorDelta):
-	#initialize variables
-	subject = "This is the subject"
-	body = "This is my message"
 
-
-	currentUpDown = "up"
-	priorUpDown = "up"
-	if priorDelta != currentDelta: #first check: string comparison to see if at least different, send message if not the same
-		print("Not the same price")
-		
-		#the number or email that we're sending the message to. Make this an option later
-		to = "your send to phone number or email"
-
-		#second check pt1: get magnitudes of each
-		if currentDelta[0] == '-':
-			currentDelta = currentDelta[1:]
-			currentUpDown = "down"
-		currentDelta = float(currentDelta)
-
-		if priorDelta[0] == '-':
-			priorDelta = priorDelta[1:]
-			priorUpDown = "down"
-		priorDelta = float(priorDelta)
-
-		#second check pt2: if the two are different in pos & neg and or the two are different by 1 percent or more, send message
-		if currentUpDown != priorUpDown:
-			print("One price was pos and one price was neg")
-			#send message saying the price is now (up or down) by _____
-			if currentDelta > 0:
-				subject = "Good News!"
-				body = "ETH is now up today at {}%".format(currentDelta)
-				sendMessage(subject, body, to)
-				print("Sent Message")
-			else:
-				subject = "Bad News!"
-				body = "ETH is now down today at {}%".format(currentDelta)
-				sendMessage(subject, body, to)
-				print("Sent Message")
-			return 'yes'
-		elif abs(currentDelta - priorDelta) >= 1:
-			print("Price differed by >= 1")
-			if currentDelta > 0:
-				#send message saying that the price is now up by ____
-				subject = "Good News!"
-				body = "ETH is still up today at {}%".format(currentDelta)
-				sendMessage(subject, body, to)
-				print("Sent Message")
-			else:
-				#send message saying that the price is now down by ____
-				subject = "Bad News!"
-				body = "ETH is still down today at {}%".format(currentDelta)
-				sendMessage(subject, body, to)
-				print("Sent Message")
-			return 'yes'
-
-	print("The current price is {}%".format(currentDelta))
-	print("The last price messaged was {}%".format(priorDelta))
-	return 'no'
-
-def sendMessage(subject, body, to):
+# Handles sending the sms mesage
+def sendMessage(body, subject, to):
 	#use EmailMessage library and set variables based on function arguments
 	msg.set_content(body)
 	msg['subject'] = subject
 	msg['to'] = to
 
 	server.send_message(msg)
+	print('sent message')
+
+	del msg['to']
 
 
 
+
+
+# Driver
 if __name__ == '__main__':
 	#email and login setup
 	msg = EmailMessage()
-	user = "your sent frome mail"
+	user = "your sent from email"
 	msg['from'] = user
-	password = "your sent from email app password"
+	password = "your send from email app password"
 
 	server = smtplib.SMTP("smtp.gmail.com", 587)
 	server.starttls()
 	server.login(user, password)
 
-	#set variables
-	currentDelta = "this is the current percent change in price"
-	priorDelta = "1000000"
+
+	#intialize variables
+	currentChange = 1.0
+	priorChange = 1000.0
+	subject = 'This is a subject'
+	body = 'This is a body'
+	to = "put your send to phone number or email here" #the number or email that we're sending the message to. Make this an option later
 	count = 0
-	update = 'no'
 
 
-	while count != 60: #this program will run for 1 hour
-		#scrape the data
-		currentDelta = webScrape()
 
-		#creates and possibly sends message
-		update = createMessage(currentDelta, priorDelta)
+	#get initial % change in price 
+	priorChange = webScrape()
+	#TODO: (send message stating that this is what we'll go off of)
+	subject = 'INITIAL'
+	body = 'This is the first message. Sending alerts when a % change in daily price differs by 1 or more, starting at {}%'.format(priorChange)
+	sendMessage(body, subject, to)
 
-		#copy over the last currentDelta
-		#priorDelta = currentDelta <-- Can't do this, or if increases or decreases little by little we'll never be alerted
-		if (update == 'yes'):
-			priorDelta = currentDelta
 
-		print('----------This was cycle {}----------'.format(count))
-		time.sleep(60) #wait 1 minute before checking again
+
+	#enter while loop that will continue to run program
+	while count != 60:
+		print('------This is loop {}------'.format(count + 1))
+		print('Previous change: {}'.format(priorChange))
+
+		#get current 24 hour % change
+		currentChange = webScrape()
+		print('Current change: {}'.format(currentChange))
+
+		if currentChange != priorChange:
+			if priorChange > 0 and currentChange < 0:
+				#output message saying it's now down today
+				subject = 'DOWN'
+				body = 'ETH is now down today at {}%'.format(currentChange)
+				sendMessage(body, subject, to)
+
+				#set prior to now be current
+				priorChange = currentChange
+			elif priorChange < 0 and currentChange > 0:
+				#output message saying it's now up today
+				subject = 'UP'
+				body = 'ETH is now up today at {}%'.format(currentChange)
+				sendMessage(body, subject, to)
+
+				#set prior to now be current
+				priorChange = currentChange
+			elif currentChange > 0:
+				if currentChange - priorChange >= 1:
+					#output message saying that it's now up even more today at ___
+					subject = 'UP'
+					body = 'ETH is now up even more today at {}%'.format(currentChange)
+					sendMessage(body, subject, to)
+
+					#set prior to now be current
+					priorChange = currentChange
+				elif currentChange - priorChange <= -1:
+					#output message saying that it's now up less today at ___
+					subject = 'UP'
+					body = 'ETH is now up less today at {}%'.format(currentChange)
+					sendMessage(body, subject, to)
+
+					#set prior to now be current
+					priorChange = currentChange
+			elif currentChange < 0:
+				if currentChange - priorChange >= 1:
+					#ouptut message saying that it's now down even more today at ___
+					subject = 'DOWN'
+					body = 'ETH is now down even more today at {}%'.format(currentChange)
+					sendMessage(body, subject, to)
+
+					#set prior to now be current
+					priorChange = currentChange
+				elif currentChange - priorChange <= -1:
+					#output message saying that it's now down less today at ___
+					subject = 'DOWN'
+					body = 'ETH is now down less today at {}%'.format(currentChange)
+					sendMessage(body, subject, to)
+
+					#set prior to now be current
+					priorChange = currentChange
+
+		#wait 2 minutes before entering loop again, making this program go on for 2 hours w/ how the while loop is set up
+		time.sleep(120)
+
 		count = count + 1
 
+	#exits while loop, we are done			
 	server.quit()
 
-
+			
