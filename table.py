@@ -8,29 +8,36 @@ import time
 app = Flask(__name__)
 
 # Scrapes Robinhood for price (just ETH for now)
-def webScrape():
-	my_url = 'https://finance.yahoo.com/quote/BTC-USD?p=BTC-USD&.tsrc=fin-srch'
+def webScrape(ticker):
+	if ticker == 'BTC' or ticker == 'ETH' or ticker == 'DOGE':
+		if ticker == 'BTC':
+			my_url = 'https://finance.yahoo.com/quote/BTC-USD?p=BTC-USD&.tsrc=fin-srch'
+		elif ticker == 'ETH':
+			my_url = 'https://finance.yahoo.com/quote/ETH-USD?p=ETH-USD&.tsrc=fin-srch'
+		elif ticker == 'DOGE':
+			my_url = 'https://finance.yahoo.com/quote/DOGE-USD?p=DOGE-USD&.tsrc=fin-srch'
 
-	#opening up connection and grab page
-	uClient = uReq(my_url)
-	page_html = uClient.read()
-	uClient.close()
+		#opening up connection and grab page
+		uClient = uReq(my_url)
+		page_html = uClient.read()
+		uClient.close()
 
-	#html parsing
-	page_soup = soup(page_html, "html.parser")
+		#html parsing
+		page_soup = soup(page_html, "html.parser")
 
-	#grab price diff %
-	data = str(page_soup.findAll("span", {"data-reactid":"34"})[1].text)
+		#grab price diff %
+		data = str(page_soup.findAll("span", {"data-reactid":"34"})[1].text)
 
-	data = data[:-2]
-	newData = ""
-	for element in reversed(data):
-		if element == '(':
-			break
-		else:
-			newData += element
-	newData = newData[::-1]
-	return float(newData)
+		data = data[:-2]
+		newData = ""
+		for element in reversed(data):
+			if element == '(':
+				break
+			else:
+				newData += element
+		newData = newData[::-1]
+		return float(newData)
+
 
 
 
@@ -48,12 +55,12 @@ def sendMessage(body, subject, to):
 
 
 # Drives the program
-def driver():
+def driver(ticker, number):
 	#email and login setup
-	#msg = EmailMessage()
-	user = "cryptoalertcoms@gmail.com"
+	user = "put your sent from email here"
 	msg['from'] = user
-	password = "gsvcsffnwykpzjwx"
+	password = "put your sent from email app password here"
+	to = number + "@vtext.com"
 
 	#server = smtplib.SMTP("smtp.gmail.com", 587)
 	server.starttls()
@@ -64,10 +71,10 @@ def driver():
 
 
 	#get initial % change in price 
-	priorChange = webScrape()
+	priorChange = webScrape(ticker)
 	#TODO: (send message stating that this is what we'll go off of)
 	subject = 'INITIAL'
-	body = 'Welcome to Cereal! You will get alerts when a change in daily price differs by 1% or more for the ticker that you indicated, starting at {}%. Text STOP to opt out of messages'.format(priorChange)
+	body = 'Welcome to Cereal! You will get alerts for {} when a change in daily price differs by 1%, starting at {}%. Text STOP to opt out of messages'.format(ticker, priorChange)
 	sendMessage(body, subject, to)
 
 
@@ -78,14 +85,14 @@ def driver():
 		#print('Previous change: {}'.format(priorChange))
 
 		#get current 24 hour % change
-		currentChange = webScrape()
+		currentChange = webScrape(ticker)
 		#print('Current change: {}'.format(currentChange))
 
 		if currentChange != priorChange:
 			if priorChange > 0 and currentChange < 0:
 				#output message saying it's now down today
 				subject = 'DOWN'
-				body = 'BTC is now down today at {}%'.format(currentChange)
+				body = '{} is now down today at {}%'.format(ticker, currentChange)
 				sendMessage(body, subject, to)
 
 				#set prior to now be current
@@ -93,7 +100,7 @@ def driver():
 			elif priorChange < 0 and currentChange > 0:
 				#output message saying it's now up today
 				subject = 'UP'
-				body = 'BTC is now up today at {}%'.format(currentChange)
+				body = '{} is now up today at {}%'.format(ticker, currentChange)
 				sendMessage(body, subject, to)
 
 				#set prior to now be current
@@ -102,7 +109,7 @@ def driver():
 				if currentChange - priorChange >= 1:
 					#output message saying that it's now up even more today at ___
 					subject = 'UP'
-					body = 'BTC is now up even more today at {}%'.format(currentChange)
+					body = '{} is now up even more today at {}%'.format(ticker, currentChange)
 					sendMessage(body, subject, to)
 
 					#set prior to now be current
@@ -110,7 +117,7 @@ def driver():
 				elif currentChange - priorChange <= -1:
 					#output message saying that it's now up less today at ___
 					subject = 'UP'
-					body = 'BTC is now up less today at {}%'.format(currentChange)
+					body = '{} is now up less today at {}%'.format(ticker, currentChange)
 					sendMessage(body, subject, to)
 
 					#set prior to now be current
@@ -119,7 +126,7 @@ def driver():
 				if currentChange - priorChange >= 1:
 					#ouptut message saying that it's now down even more today at ___
 					subject = 'DOWN'
-					body = 'BTC is now down less today at {}%'.format(currentChange)
+					body = '{} is now down less today at {}%'.format(ticker, currentChange)
 					sendMessage(body, subject, to)
 
 					#set prior to now be current
@@ -127,7 +134,7 @@ def driver():
 				elif currentChange - priorChange <= -1:
 					#output message saying that it's now down less today at ___
 					subject = 'DOWN'
-					body = 'BTC is now down even more today at {}%'.format(currentChange)
+					body = '{} is now down even more today at {}%'.format(ticker, currentChange)
 					sendMessage(body, subject, to)
 
 					#set prior to now be current
@@ -151,7 +158,7 @@ def home():
 		number = request.form.get("number")
 
 		#drives the program
-		driver()
+		driver(ticker, number)
 
 		return "done"
 
@@ -166,7 +173,7 @@ if __name__ == '__main__':
 	priorChange = 1000.0
 	subject = 'This is a subject'
 	body = 'This is a body'
-	to = "5869071926@vtext.com" #the number or email that we're sending the message to. Make this an option later
+	to = "put a filler number here" #the number or email that we're sending the message to. Make this an option later
 
 	app.run()
 
