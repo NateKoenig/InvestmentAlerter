@@ -187,6 +187,7 @@ if __name__ == '__main__':
 	subject = 'This is a subject'
 	body = 'This is a body'
 	to = "dummy number" #the number or email that we're sending the message to. Make this an option later
+	carrier = "dummy carrier"
 
 	app.run()
 
