@@ -55,12 +55,25 @@ def sendMessage(body, subject, to):
 
 
 # Drives the program
-def driver(ticker, number):
+def driver(ticker, number, carrier):
 	#email and login setup
-	user = "put your sent from email here"
+	user = "sent from email"
 	msg['from'] = user
-	password = "put your sent from email app password here"
-	to = number + "@vtext.com"
+	password = "sent from email app password"
+	carrierEmail = "some email string"
+	
+	if carrier == "VERIZON" or carrier == "XFINITY":
+		carrierEmail = "vtext.com"
+	elif carrier == "AT&T":
+		carrierEmail = "txt.att.net"
+	elif carrier == "SPRINT":
+		carrierEmail = "messaging.sprintpcs.com"
+	elif carrier == "TMOBILE":
+		carrierEmail = "tmomail.net"
+	elif carrier == "VIRGIN":
+		carrierEmail = "vmobl.com"
+
+	to = number + "@" + carrierEmail
 
 	#server = smtplib.SMTP("smtp.gmail.com", 587)
 	server.starttls()
@@ -74,7 +87,7 @@ def driver(ticker, number):
 	priorChange = webScrape(ticker)
 	#TODO: (send message stating that this is what we'll go off of)
 	subject = 'INITIAL'
-	body = 'Welcome to Cereal! You will get alerts for {} when a change in daily price differs by 1%, starting at {}%. Text STOP to opt out of messages'.format(ticker, priorChange)
+	body = 'Welcome to Cereal! You will get alerts for {} when a change in daily price differs by 1%, starting at {}%.'.format(ticker, priorChange)
 	sendMessage(body, subject, to)
 
 
@@ -158,7 +171,7 @@ def home():
 		number = request.form.get("number")
 
 		#drives the program
-		driver(ticker, number)
+		driver(ticker, number, carrier)
 
 		return "done"
 
@@ -173,7 +186,7 @@ if __name__ == '__main__':
 	priorChange = 1000.0
 	subject = 'This is a subject'
 	body = 'This is a body'
-	to = "put a filler number here" #the number or email that we're sending the message to. Make this an option later
+	to = "dummy number" #the number or email that we're sending the message to. Make this an option later
 
 	app.run()
 
