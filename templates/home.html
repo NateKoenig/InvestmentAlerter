@@ -7,14 +7,20 @@
 		<img src="IMG_4772.jpg" alt="Cereal Logo">
 		<h1 class='welcome'>Welcome to Cereal</h1>
 		<p class='summary'>Get alerts for the stock or crypto of your choice. Enter a stock/crypto ticker and your phone number to recieve alerts.</p>
-		<p class='summary'>Supported tickers so far include: BTC, ETH, DOGE</p>
+		<p class='summary'>Close the browser when you don't want to recieve anymore messages.</p>
 
 		<form action="{{ url_for('home')}}" method="post" class='form'>
 		<label for="ticker" class='tickertext'>Ticker:</label>
 		<input type="text" id="ticker" name="ticker" placeholder="ex: BTC" class="box1">
 		<label for="number" class='numbertext'>Phone number:</label>
 		<input type="text" id="number" name="number" placeholder="ex: 1112223333" class="box2">
+		<label for="carrier" class='carriertext'>Carrier:</label>
+		<input type="text" id="carrier" name="carrier" placeholder="ex: VERIZON" class="box3">
 		<button type="submit" class="submitbutton">Send me sms alerts</button>
+		</form>
+
+		<p class='support1'>* Supported tickers so far include: BTC, ETH, DOGE</p>
+		<p class='support2'>* Supported phone carriers so far include: VERIZON, AT&T, SPRINT, TMOBILE, XFINITY, VIRGIN</p>
 
 		<style>
 		.bodystuff {
@@ -24,7 +30,7 @@
 		.welcome {
 			color: black;
 			text-align: center;
-			padding-top: 2.8em;
+			padding-top: 2.4em;
 			padding-right: 4em;
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			font-size: 80px;
@@ -35,6 +41,21 @@
 			text-align: center;
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			font-size:  20px;
+		}
+
+		.support1 {
+			color: black;
+			text-align: center;
+			padding-right: 20em;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+			font-size:  13px;
+		}
+
+		.support2 {
+			color: black;
+			text-align: center;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+			font-size:  13px;
 		}
 
 		.tickertext {
@@ -69,6 +90,14 @@
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 		}
 
+		.box3 {
+			background-color: white;
+			color: black;
+			border: 2px solid #000000; /* Black */
+			border-radius: 5px;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+		}
+
 		.submitbutton {
 			background-color: black;
 			color: white;
@@ -79,13 +108,13 @@
 		</style>
 
 	</body>
-	<footer>
+	<footer class='form'>
 		<p class='footer'>If you have any feedback, email us at: </p>
 		<a class='footer' href="mailto:cerealapp@gmail.com">cerealapp@gmail.com</a>
 
 		<style>
 			.footer {
-				padding-top: 22em;
+				padding-top: 16em;
 				font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			}
 		</style>
