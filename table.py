@@ -1,21 +1,30 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import smtplib
 from email.message import EmailMessage
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
 import time
+import sys
 
 app = Flask(__name__)
 
 # Scrapes Robinhood for price (just ETH for now)
 def webScrape(ticker):
-	if ticker == 'BTC' or ticker == 'ETH' or ticker == 'DOGE':
+	if ticker == 'BTC' or ticker == 'ETH' or ticker == 'DOGE' or ticker == 'GME' or ticker == 'AMC' or ticker == 'TSLA' or ticker == 'BB':
 		if ticker == 'BTC':
 			my_url = 'https://finance.yahoo.com/quote/BTC-USD?p=BTC-USD&.tsrc=fin-srch'
 		elif ticker == 'ETH':
 			my_url = 'https://finance.yahoo.com/quote/ETH-USD?p=ETH-USD&.tsrc=fin-srch'
 		elif ticker == 'DOGE':
 			my_url = 'https://finance.yahoo.com/quote/DOGE-USD?p=DOGE-USD&.tsrc=fin-srch'
+		elif ticker == 'GME':
+			my_url = 'https://finance.yahoo.com/quote/GME?p=GME&.tsrc=fin-srch'
+		elif ticker == 'AMC':
+			my_url = 'https://finance.yahoo.com/quote/AMC?p=AMC&.tsrc=fin-srch'
+		elif ticker == 'TSLA':
+			my_url = 'https://finance.yahoo.com/quote/TSLA?p=TSLA&.tsrc=fin-srch'
+		elif ticker == 'BB':
+			my_url = 'https://finance.yahoo.com/quote/BB?p=BB&.tsrc=fin-srch'
 
 		#opening up connection and grab page
 		uClient = uReq(my_url)
@@ -26,7 +35,10 @@ def webScrape(ticker):
 		page_soup = soup(page_html, "html.parser")
 
 		#grab price diff %
-		data = str(page_soup.findAll("span", {"data-reactid":"34"})[1].text)
+		if ticker == 'GME' or ticker == 'AMC' or ticker == 'TSLA' or ticker == 'BB':
+			data = str(page_soup.findAll("span", {"data-reactid":"51"})[0].text)
+		else:
+			data = str(page_soup.findAll("span", {"data-reactid":"34"})[1].text)
 
 		data = data[:-2]
 		newData = ""
@@ -55,7 +67,7 @@ def sendMessage(body, subject, to):
 
 
 # Drives the program
-def driver(ticker, number, carrier):
+def driver(ticker, number, carrier, threshold, duration):
 	#email and login setup
 	user = "sent from email"
 	msg['from'] = user
@@ -85,7 +97,6 @@ def driver(ticker, number, carrier):
 
 	#get initial % change in price 
 	priorChange = webScrape(ticker)
-	#TODO: (send message stating that this is what we'll go off of)
 	subject = 'INITIAL'
 	body = 'Welcome to Cereal! You will get alerts for {} when a change in daily price differs by 1%, starting at {}%.'.format(ticker, priorChange)
 	sendMessage(body, subject, to)
@@ -93,13 +104,9 @@ def driver(ticker, number, carrier):
 
 
 	#enter while loop that will continue to run program
-	while count != 60:
-		#print('------This is loop {}------'.format(count + 1))
-		#print('Previous change: {}'.format(priorChange))
-
+	while count != (int(30 * duration)):
 		#get current 24 hour % change
 		currentChange = webScrape(ticker)
-		#print('Current change: {}'.format(currentChange))
 
 		if currentChange != priorChange:
 			if priorChange > 0 and currentChange < 0:
@@ -119,7 +126,7 @@ def driver(ticker, number, carrier):
 				#set prior to now be current
 				priorChange = currentChange
 			elif currentChange > 0:
-				if currentChange - priorChange >= 1:
+				if float(currentChange - priorChange) >= threshold:
 					#output message saying that it's now up even more today at ___
 					subject = 'UP'
 					body = '{} is now up even more today at {}%'.format(ticker, currentChange)
@@ -127,7 +134,7 @@ def driver(ticker, number, carrier):
 
 					#set prior to now be current
 					priorChange = currentChange
-				elif currentChange - priorChange <= -1:
+				elif float(currentChange - priorChange) <= (-1 * threshold):
 					#output message saying that it's now up less today at ___
 					subject = 'UP'
 					body = '{} is now up less today at {}%'.format(ticker, currentChange)
@@ -136,7 +143,7 @@ def driver(ticker, number, carrier):
 					#set prior to now be current
 					priorChange = currentChange
 			elif currentChange < 0:
-				if currentChange - priorChange >= 1:
+				if float(currentChange - priorChange) >= threshold:
 					#ouptut message saying that it's now down even more today at ___
 					subject = 'DOWN'
 					body = '{} is now down less today at {}%'.format(ticker, currentChange)
@@ -144,7 +151,7 @@ def driver(ticker, number, carrier):
 
 					#set prior to now be current
 					priorChange = currentChange
-				elif currentChange - priorChange <= -1:
+				elif float(currentChange - priorChange) <= (-1 * threshold):
 					#output message saying that it's now down less today at ___
 					subject = 'DOWN'
 					body = '{} is now down even more today at {}%'.format(ticker, currentChange)
@@ -153,7 +160,7 @@ def driver(ticker, number, carrier):
 					#set prior to now be current
 					priorChange = currentChange
 
-		#wait 2 minutes before entering loop again, making this program go on for 2 hours w/ how the while loop is set up
+		#wait 2 minutes before entering loop again
 		time.sleep(120)
 
 		count = count + 1
@@ -166,16 +173,21 @@ def driver(ticker, number, carrier):
 @app.route("/", methods =["GET", "POST"])
 def home():
 	if request.method == "POST":
+
 		#get info from html form
 		ticker = request.form.get("ticker")
 		number = request.form.get("number")
+		carrier = request.form.get('carrier')
+		threshold = float(request.form.get('alerts'))
+		duration = float(request.form.get('duration'))
 
-		#drives the program
-		driver(ticker, number, carrier)
+		driver(ticker, number, carrier, threshold, duration)
 
-		return "done"
+		return render_template("buttonpressed.html")
 
 	return render_template("home.html")
+
+
 
 # Starts the program
 if __name__ == '__main__':
@@ -186,8 +198,12 @@ if __name__ == '__main__':
 	priorChange = 1000.0
 	subject = 'This is a subject'
 	body = 'This is a body'
-	to = "dummy number" #the number or email that we're sending the message to. Make this an option later
-	carrier = "dummy carrier"
+	to = "enter dummy number" #the number or email that we're sending the message to. Make this an option later
+	carrier = "VERIZON"
+	threshold = 1.0
+	duration = 1.0
+
+	#sys.exit()
 
 	app.run()
 
