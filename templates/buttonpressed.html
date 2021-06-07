@@ -1,14 +1,19 @@
 <!doctype html>
 <html>
 	<head>
-		<title>Cereal</title>
+		<title>Cerial</title>
 	</head>
 	<body class="bodystuff">
-		<img src="IMG_4772.jpg" alt="Cereal Logo">
-		<h1 class='welcome'>Thank you for using Cereal</h1>
+		<img src="{{url_for('static',filename='IMG_4772.jpg')}}" alt="Cerial Logo" width="110" height="50" class="image">
+		<h1 class='welcome'>Thank you for using Cerial</h1>
 		<p class='summary'>Your chosen duration alert session is now over. If you'd like to recieve more alerts, refresh the page and fill out your info again!</p>
 
 		<style>
+		.image {
+			padding-top: 10em;
+			padding-left: 12.5em;
+		}
+
 		.bodystuff {
 			background-color: #FFFFFF; /* Black */
 		}
@@ -16,7 +21,7 @@
 		.welcome {
 			color: black;
 			text-align: center;
-			padding-top: 2.4em;
+			/*padding-top: 2.4em;*/
 			padding-right: 4em;
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			font-size: 80px;
@@ -25,7 +30,7 @@
 		.summary {
 			color: black;
 			text-align: center;
-			padding-right: 10em;
+			padding-right: 8em;
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			font-size:  20px;
 		}
@@ -34,7 +39,7 @@
 	</body>
 	<footer class='form'>
 		<p class='footer1'>If you have any feedback, email us at:</p>
-		<p class='footer2'><a href="mailto:cerealapp@gmail.com">cerealapp@gmail.com</a><p>
+		<p class='footer2'><a href="mailto:cerealapp@gmail.com">cerialapp@gmail.com</a><p>
 
 		<style>
 			.footer1 {
