@@ -6,8 +6,8 @@
 	<body class="bodystuff">
 		<img src="IMG_4772.jpg" alt="Cereal Logo">
 		<h1 class='welcome'>Welcome to Cereal</h1>
-		<p class='summary'>Get alerts for the stock or crypto of your choice. Enter a stock/crypto ticker and your phone number to recieve alerts.</p>
-		<p class='summary'>Close the browser when you don't want to recieve anymore messages.</p>
+		<p class='summary1'>Get alerts for the stock or crypto of your choice. Enter the info below to recieve alerts.</p>
+		<p class='summary2'>Close the browser when you don't want to recieve anymore messages. NOTE: Alert threshold means at what % daily change in price do you want to be alerted.</p>
 
 		<form action="{{ url_for('home')}}" method="post" class='form'>
 		<label for="ticker" class='tickertext'>Ticker:</label>
@@ -16,10 +16,14 @@
 		<input type="text" id="number" name="number" placeholder="ex: 1112223333" class="box2">
 		<label for="carrier" class='carriertext'>Carrier:</label>
 		<input type="text" id="carrier" name="carrier" placeholder="ex: VERIZON" class="box3">
+		<label for="alerts" class='alerts'>Alert threshold:</label>
+		<input type="text" id="alerts" name="alerts" placeholder="ex: 1" class="box4">
+		<label for="duration" class='duration'>Duration (in hours):</label>
+		<input type="text" id="duration" name="duration" placeholder="ex: 8" class="box5">
 		<button type="submit" class="submitbutton">Send me sms alerts</button>
 		</form>
 
-		<p class='support1'>* Supported tickers so far include: BTC, ETH, DOGE</p>
+		<p class='support1'>* Supported tickers so far include: BTC, ETH, DOGE, TSLA, GME, AMC, BB</p>
 		<p class='support2'>* Supported phone carriers so far include: VERIZON, AT&T, SPRINT, TMOBILE, XFINITY, VIRGIN</p>
 
 		<style>
@@ -36,17 +40,26 @@
 			font-size: 80px;
 		}
 
-		.summary {
+		.summary1 {
 			color: black;
 			text-align: center;
+			padding-right: 13em;
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			font-size:  20px;
+		}
+
+		.summary2 {
+			color: black;
+			text-align: center;
+			padding-left: 6em;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+			font-size:  15px;
 		}
 
 		.support1 {
 			color: black;
 			text-align: center;
-			padding-right: 20em;
+			padding-right: 9.5em;
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			font-size:  13px;
 		}
@@ -98,6 +111,22 @@
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 		}
 
+		.box4 {
+			background-color: white;
+			color: black;
+			border: 2px solid #000000; /* Black */
+			border-radius: 5px;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+		}
+
+		.box5 {
+			background-color: white;
+			color: black;
+			border: 2px solid #000000; /* Black */
+			border-radius: 5px;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+		}
+
 		.submitbutton {
 			background-color: black;
 			color: white;
@@ -114,7 +143,7 @@
 
 		<style>
 			.footer {
-				padding-top: 16em;
+				padding-top: 15em;
 				font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			}
 		</style>
