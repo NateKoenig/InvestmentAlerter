@@ -1,11 +1,11 @@
 <!doctype html>
 <html>
 	<head>
-		<title>Cereal</title>
+		<title>Cerial</title>
 	</head>
 	<body class="bodystuff">
-		<img src="IMG_4772.jpg" alt="Cereal Logo">
-		<h1 class='welcome'>Welcome to Cereal</h1>
+		<img src="{{url_for('static',filename='IMG_4772.jpg')}}" alt="Cerial Logo" width="110" height="50" class="image">
+		<h1 class='welcome'>Welcome to Cerial</h1>
 		<p class='summary1'>Get alerts for the stock or crypto of your choice. Enter the info below to recieve alerts.</p>
 		<p class='summary2'>Close the browser when you don't want to recieve anymore messages. NOTE: Alert threshold means at what % daily change in price do you want to be alerted.</p>
 
@@ -27,6 +27,11 @@
 		<p class='support2'>* Supported phone carriers so far include: VERIZON, AT&T, SPRINT, TMOBILE, XFINITY, VIRGIN</p>
 
 		<style>
+		.image {
+			padding-top: 10em;
+			padding-left: 20.3em;
+		}
+
 		.bodystuff {
 			background-color: #FFFFFF; /* Black */
 		}
@@ -34,8 +39,8 @@
 		.welcome {
 			color: black;
 			text-align: center;
-			padding-top: 2.4em;
-			padding-right: 4em;
+			/*padding-top: 2.4em;*/
+			padding-right: 4.3em;
 			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 			font-size: 80px;
 		}
