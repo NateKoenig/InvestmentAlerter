@@ -69,9 +69,9 @@ def sendMessage(body, subject, to):
 # Drives the program
 def driver(ticker, number, carrier, threshold, duration):
 	#email and login setup
-	user = "cryptoalertcoms@gmail.com"
+	user = "your sent from email"
 	msg['from'] = user
-	password = "gsvcsffnwykpzjwx"
+	password = "your sent from email app password"
 	carrierEmail = "some email string"
 	
 	if carrier == "VERIZON" or carrier == "XFINITY":
@@ -198,7 +198,7 @@ if __name__ == '__main__':
 	priorChange = 1000.0
 	subject = 'This is a subject'
 	body = 'This is a body'
-	to = "5869071926@vtext.com" #the number or email that we're sending the message to. Make this an option later
+	to = "filler send to number (string)" #the number or email that we're sending the message to. Make this an option later
 	carrier = "VERIZON"
 	threshold = 1.0
 	duration = 1.0
